@@ -65,12 +65,15 @@ def write_merged_image(image:str, text:str, output:str,
     background_consume_text -- if True, text will not be cut by background color
     background -- background color, overwrite background color found in metadata
 
+    return -- number of times the given text have been written in output image
+
     """
     if adjust:
         x_just = y_just = adjust
     width, height, pixels, meta = image_reader(image)
     outwidth = int(width * text_size * x_just)
     outheight = int(height * text_size * y_just)
+    TEXT_LEN = len(text)
     text = cycle(text)
 
     surface = gizeh.Surface(width=outwidth, height=outheight)
@@ -86,6 +89,7 @@ def write_merged_image(image:str, text:str, output:str,
     ).draw(surface)
 
     # write the letters themselves
+    nb_written_letter = 0
     for nol, line in enumerate(pixels):
         if term_width:
             oks = ('>' * int(nol/height * term_width)).ljust(term_width-1)
@@ -95,6 +99,7 @@ def write_merged_image(image:str, text:str, output:str,
             if color == bg_color and not background_consume_text:
                 continue
             letter = next(text)
+            nb_written_letter += 1
             todraw = gizeh.text(
                 letter, stroke=color, fill=color,
                 xy=(idx*text_size*x_just+text_size//2, nol*text_size*y_just+text_size//2),
@@ -105,6 +110,7 @@ def write_merged_image(image:str, text:str, output:str,
             todraw.draw(surface)
 
     surface.write_to_png(output)
+    return nb_written_letter / TEXT_LEN
 
 
 if __name__ == "__main__":
