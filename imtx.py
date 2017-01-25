@@ -43,6 +43,10 @@ def image_reader(input_image:str):
     return reader.asRGB()
 
 
+def color255_to_color_ratio(color:tuple) -> tuple:
+    return tuple(sub/255 for sub in color)
+
+
 def write_merged_image(image:str, text:str, output:str,
                        text_size:int=20, term_width:int=None,
                        text_font:str='Impact',
@@ -74,7 +78,9 @@ def write_merged_image(image:str, text:str, output:str,
 
     surface = gizeh.Surface(width=outwidth, height=outheight)
     # write the background
-    bg_color = background or meta.get('background', DEFAULT_BACKGROUND)
+    bg_color = color255_to_color_ratio(
+        background or meta.get('background', DEFAULT_BACKGROUND)
+    )
     gizeh.rectangle(
         xy=(outwidth//2, outheight//2),
         lx=outwidth,
@@ -88,12 +94,10 @@ def write_merged_image(image:str, text:str, output:str,
             oks = ('>' * int(nol/height * term_width)).ljust(term_width)
             print('\r[' + oks + ']', end='', flush=True)
         for idx, color in enumerate(line_colors(line)):
+            color = color255_to_color_ratio(color)
             if color == bg_color and not background_consume_text:
                 continue
             letter = next(text)
-            assert all(0 <= sub <= 255 for sub in color)
-            color = tuple([sub/255 for sub in color] + [1])
-            assert all(0 <= sub <= 1 for sub in color)
             todraw = gizeh.text(
                 letter, stroke=color, fill=color,
                 xy=(idx*text_size*x_just+text_size//2, nol*text_size*y_just+text_size//2),
