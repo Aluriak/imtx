@@ -90,3 +90,6 @@ ENV/
 
 # vim session
 Session.vim
+
+# images
+*.png
