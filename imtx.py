@@ -23,7 +23,7 @@ import docopt
 
 DEFAULT_BACKGROUND = (255, 255, 255)
 TERM_WIDTH = shutil.get_terminal_size().columns
-NB_RGB = 3
+NB_RGBA = 4
 
 
 def grouper(iterable, n, fillvalue=None):
@@ -34,17 +34,14 @@ def grouper(iterable, n, fillvalue=None):
 
 
 
-def line_colors(line):
-    for color in grouper(line, NB_RGB):
-        yield color
-
 def image_reader(input_image:str):
     reader = png.Reader(filename=input_image)
-    return reader.asRGB()
+    return reader.asRGBA()
 
 
 def color255_to_color_ratio(color:tuple) -> tuple:
-    return tuple(sub/255 for sub in color)
+    """Return normalized color, without the alpha channel if given"""
+    return tuple(sub/255 for sub in color)[:3]
 
 
 def write_merged_image(image:str, text:str, output:str,
@@ -93,7 +90,7 @@ def write_merged_image(image:str, text:str, output:str,
         if term_width:
             oks = ('>' * int(nol/height * term_width)).ljust(term_width)
             print('\r[' + oks + ']', end='', flush=True)
-        for idx, color in enumerate(line_colors(line)):
+        for idx, color in enumerate(grouper(line, NB_RGBA)):
             color = color255_to_color_ratio(color)
             if color == bg_color and not background_consume_text:
                 continue
