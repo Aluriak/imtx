@@ -88,7 +88,7 @@ def write_merged_image(image:str, text:str, output:str,
     # write the letters themselves
     for nol, line in enumerate(pixels):
         if term_width:
-            oks = ('>' * int(nol/height * term_width)).ljust(term_width)
+            oks = ('>' * int(nol/height * term_width)).ljust(term_width-1)
             print('\r[' + oks + ']', end='', flush=True)
         for idx, color in enumerate(grouper(line, NB_RGBA)):
             color = color255_to_color_ratio(color)
