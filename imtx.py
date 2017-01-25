@@ -21,6 +21,7 @@ import gizeh
 import docopt
 
 
+DEFAULT_BACKGROUND = (255, 255, 255)
 TERM_WIDTH = shutil.get_terminal_size().columns
 NB_RGB = 3
 
@@ -46,7 +47,24 @@ def write_merged_image(image:str, text:str, output:str,
                        text_size:int=20, term_width:int=None,
                        text_font:str='Impact',
                        x_just:float=0.8, y_just:float=0.8, adjust:float=None,
-                       background_consume_text:bool=False):
+                       background_consume_text:bool=False,
+                       background:tuple=None):
+    """Perform the interlacing treatment on image found in given file and
+    given text.
+
+    image -- filename containing png data
+    text -- text to integrate in output image
+    output -- output filename
+    text_size -- text size in output image
+    term_width -- if given, allow a progress bar to appear during treatment
+    text_font -- text font family in output image
+    x_just -- ratio applied on distances between letters of same row
+    y_just -- ratio applied on distances between letters of same column
+    adjust -- if given, ratio overwritting x_just and y_just
+    background_consume_text -- if True, text will not be cut by background color
+    background -- background color, overwrite background color found in metadata
+
+    """
     if adjust:
         x_just = y_just = adjust
     width, height, pixels, meta = image_reader(image)
@@ -56,7 +74,7 @@ def write_merged_image(image:str, text:str, output:str,
 
     surface = gizeh.Surface(width=outwidth, height=outheight)
     # write the background
-    bg_color = meta.get('background', (255, 255, 255))
+    bg_color = background or meta.get('background', DEFAULT_BACKGROUND)
     gizeh.rectangle(
         xy=(outwidth//2, outheight//2),
         lx=outwidth,
