@@ -9,9 +9,11 @@ options:
     --text-size=int     text size in output image           [default: 20]
     --text-font=font    text font in output image           [default: FreeSerif]
     --adjust=float      ratio applyied on output image      [default: 0.7]
+    --bg-color=I,I,I    RGB code of background              [default: 255, 255, 255]
 
 """
 
+import os
 import shutil
 import itertools
 from itertools import zip_longest, cycle
@@ -115,16 +117,22 @@ def write_merged_image(image:str, text:str, output:str,
 
 if __name__ == "__main__":
     args = docopt.docopt(__doc__)
+    if os.path.exists(args['<text>']):
+        with open(args['<text>']) as fd:
+            args['<text>'] = fd.read()
 
-    write_merged_image(
+    ratio = write_merged_image(
         args['<input-filename>'], args['<text>'],
         term_width=(TERM_WIDTH//4 if args['--progress-bar'] else None),
         output=args['<output-filename>'],
         text_size=int(args['--text-size']),
         text_font=args['--text-font'],
         adjust=float(args['--adjust']),
+        background=tuple(int(_.strip()) for _ in args['--bg-color'].split(',')),
         # text_font='Source Code Pro',
         # text_font='FreeSerif',
         # text_font='FreeSans',
         # text_font='Oxygen-Sans',
     )
+
+    print('Text written {} times'.format(round(ratio, 1)))
